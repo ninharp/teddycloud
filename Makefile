@@ -175,7 +175,6 @@ $(OBJ_DIR)/%.o: %.c $(HEADERS) $(THIS_MAKEFILE)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	echo $(HEADERS)	
 	rm -f $(BINARY)
 	$(foreach O,$(OBJECTS),rm -f $(O);)
 	rm -rf $(INSTALL_DIR)/
