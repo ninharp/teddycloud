@@ -17,14 +17,11 @@ SOURCES = \
 	$(wildcard $(SRC_DIR)/*.c) \
 	$(wildcard $(SRC_DIR)/proto/*.c) \
 	src/platform/platform_$(PLATFORM).c \
-	cyclone/cyclone_tcp/http/http_server.c \
 	$(CYCLONE_SOURCES)
 
 HEADERS = \
 	$(wildcard include/*.h) \
-	$(CYCLONE_SOURCES:.c=.h) \
-	cyclone/cyclone_tcp/http/http_server.h
-
+	$(CYCLONE_SOURCES:.c=.h)
 
 CYCLONE_SOURCES = \
 	cyclone/common/cpu_endian.c \
@@ -35,11 +32,12 @@ CYCLONE_SOURCES = \
 	cyclone/common/path.c \
 	cyclone/common/str.c \
 	cyclone/cyclone_tcp/http/mime.c \
-	cyclone/cyclone_tcp/http/http_server_misc.c \
 	cyclone/cyclone_tcp/http/http_client.c \
 	cyclone/cyclone_tcp/http/http_client_misc.c \
 	cyclone/cyclone_tcp/http/http_client_transport.c \
 	cyclone/cyclone_tcp/http/http_common.c \
+	cyclone/cyclone_tcp/http/http_server.c \
+	cyclone/cyclone_tcp/http/http_server_misc.c \
 	cyclone/cyclone_ssl/tls.c \
 	cyclone/cyclone_ssl/tls_cipher_suites.c \
 	cyclone/cyclone_ssl/tls_handshake.c \
@@ -101,7 +99,18 @@ CYCLONE_SOURCES = \
 	cyclone/cyclone_crypto/pkix/x509_signature.c \
 	cyclone/cyclone_crypto/kdf/hkdf.c \
 	cyclone/cyclone_crypto/rng/yarrow.c
-	
+
+# remove cyclone sources for which modifications exist
+CYCLONE_SOURCES := $(filter-out \
+	cyclone/cyclone_tcp/http/http_server.c \
+	cyclone/cyclone_tcp/http/http_server_misc.c \
+	, $(CYCLONE_SOURCES))
+
+# and add modified ones
+CYCLONE_SOURCES += \
+	src/cyclone/cyclone_tcp/http/http_server.c \
+	src/cyclone/cyclone_tcp/http/http_server_misc.c
+
 
 LIBS = -lpthread
 
@@ -166,6 +175,7 @@ $(OBJ_DIR)/%.o: %.c $(HEADERS) $(THIS_MAKEFILE)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
+	echo $(HEADERS)	
 	rm -f $(BINARY)
 	$(foreach O,$(OBJECTS),rm -f $(O);)
 	rm -rf $(INSTALL_DIR)/
